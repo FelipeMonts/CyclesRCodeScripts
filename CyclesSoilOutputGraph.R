@@ -25,7 +25,7 @@
 
 #  Set Working directory
 
-setwd("C:/Felipe/OrganicTransitions_N2OROSE/CyclesSimulation/RoseRCodeScripts/SumarizingC_CyclesSimulations/ROSE Simulation Work/High C no cover crop") ;
+setwd("C:/Felipe/CYCLES") ;
 
 
 #Loand And install packages 
@@ -36,31 +36,41 @@ library(readxl) ;
 
 # Create a directory for sumarizing outputs
 
-# dir.create()
+dir.create("SoilGraphOutput") ;
 
 #  initialize the dataframe where data will be collected
 
-Summary.High_C_no_cover<-data.frame()  ;
-
-#  i=list.files()[2]
-
-for (i in list.files()) {
-  
   
   ###############################################################################################################
   #                         Read data sets into R            
   ###############################################################################################################
   
-  #paste0("./",list.files()[1],"/N.dat")
-  
-  #  For High C no  cover crop
-  
-  #   c:\Felipe\OrganicTransitions_N2OROSE\CyclesSimulation\RoseRCodeScripts\SumarizingC_CyclesSimulations\ROSE Simulation Work\High C no cover      crop
-  
-  
-  ######  Read only the columns that are wanted  
-  
-  
+ SoilLayersCN.Labels.1<-trimws(read.table("./ContinuousCorn/soilLayersCN.dat", header = F, nrows=1, sep='\t',as.is=T)) ;
+ SoilLayersCN.Labels.2<-trimws(read.table("./ContinuousCorn/soilLayersCN.dat", header = F, skip=1,nrows=1,sep='\t', as.is=T)) ; 
+ SoilLayersCN.Labels.3<-trimws(read.table("./ContinuousCorn/soilLayersCN.dat", header = F, skip=2,nrows=1,sep='\t', as.is=T)) ; 
+ 
+
+
+ SoilLayersCN.Labels.colClasses<-c("character", "Date",rep("numeric", 125)) ;
+ 
+
+ 
+ 
+ SoilLayersCN.Headers<-t(paste(t(SoilLayersCN.Labels.1),t(SoilLayersCN.Labels.2),t(SoilLayersCN.Labels.3),sep=".") );
+ 
+ SoilLayersCN.Headers[128]<-'NA' ;
+ 
+ SoilLayersCN.Data<-read.table("./ContinuousCorn/soilLayersCN.dat", header = F, skip=3, sep='\t', colClasses = SoilLayersCN.Labels.colClasses,col.names =SoilLayersCN.Headers )
+ 
+ head(SoilLayersCN.Data)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
   Nitrogen.dat.cols<-c("character", "NULL", "NULL","NULL","NULL","NULL","NULL","NULL", "NULL","NULL","NULL", "NULL" , NA , "NULL") ;
   
   Nitrogen.dat<-read.table(paste0("./",i,"/N.dat"), header=F , skip=2 , sep="\t" , as.is= T ,colClasses =Nitrogen.dat.cols )  ;
