@@ -49,26 +49,62 @@ dir.create("SoilGraphOutput") ;
  SoilLayersCN.Labels.2<-trimws(read.table("./ContinuousCorn/soilLayersCN.dat", header = F, skip=1,nrows=1,sep='\t', as.is=T)) ; 
  SoilLayersCN.Labels.3<-trimws(read.table("./ContinuousCorn/soilLayersCN.dat", header = F, skip=2,nrows=1,sep='\t', as.is=T)) ; 
  
-
-
- SoilLayersCN.Labels.colClasses<-c("character", "Date",rep("numeric", 125)) ;
- 
-
- 
+#  
+#  Data.scan<-scan("./ContinuousCorn/soilLayersCN.dat", what="raw")
+#  
+#  str(Data.scan)
+# 
+#  Data.scan[900:1600]
+#  
+# matrix(Data.scan,nrow=127)
+# 
+# 
+# 
+# 
+#  
+#  SoilLayersCN.Labels.colClasses<-c("character", "Date",rep("numeric", 125)) ;
+#  
+# 
+#  
  
  SoilLayersCN.Headers<-t(paste(t(SoilLayersCN.Labels.1),t(SoilLayersCN.Labels.2),t(SoilLayersCN.Labels.3),sep=".") );
  
  SoilLayersCN.Headers[128]<-'NA' ;
  
- SoilLayersCN.Data<-read.table("./ContinuousCorn/soilLayersCN.dat", header = F, skip=3, sep='\t', colClasses = SoilLayersCN.Labels.colClasses,col.names =SoilLayersCN.Headers )
+ SoilLayersCN.Data<-read.table("./ContinuousCorn/soilLayersCN.dat", header = F, skip=3, sep='\t', col.names =SoilLayersCN.Headers );
  
  head(SoilLayersCN.Data)
  
  
+ SoilLayersCN.Data$DOY<-as.POSIXlt(SoilLayersCN.Data$DATE...YYYY.MM.DD)[,"yday"]  ;
+ 
+ SoilLayersCN.Data$Year<-as.POSIXlt(SoilLayersCN.Data$DATE...YYYY.MM.DD)  ;
+ 
+ SoilLayersCN.Data$Year.factor<-as.factor(SoilLayersCN.Data$Year)  ;
+ 
+ Test.data<-SoilLayersCN.Data[SoilLayersCN.Data$Year.factor==80,c(1:12,129)]
+ 
+ head(Test.data)
  
  
+# Soil Layers
+# 1-0.00
+# 2-0.05
+# 3-0.10
+# 4-0.20
+# 5-0.40
+# 6-0.60
+# 7-0.80
+# 8-1.00
+# 9-1.20
+
  
+
+
+
+ head(SoilLayersCN.Data$DOY)
  
+SoilLayersCN.Data$DOY
  
  
   Nitrogen.dat.cols<-c("character", "NULL", "NULL","NULL","NULL","NULL","NULL","NULL", "NULL","NULL","NULL", "NULL" , NA , "NULL") ;
