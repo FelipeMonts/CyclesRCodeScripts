@@ -129,6 +129,8 @@ dir.create("SoilGraphOutput") ;
 
  #Plot the other variables and other years
  
+ #NH4
+ 
  head(SoilLayersCN.Data)[,99:107]
  
  str(SoilLayersCN.Data)
@@ -141,6 +143,8 @@ dir.create("SoilGraphOutput") ;
  
  filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[9:1,3],z=NH4.Matrix_neg,color.palette=rainbow,nlevels=10);
  
+ 
+ #Water Content
 
  Water.data<-SoilLayersCN.Data[SoilLayersCN.Data$Year==80,c(107:99,129,130)]  ;
  head(Water.data)
@@ -151,6 +155,21 @@ dir.create("SoilGraphOutput") ;
  
  
  filled.contour(x=Test.data[,"DOY"], y=SoilLayers.depth_m[9:1,3], z=Water.data.Matrix_neg , color.palette=rainbow,nlevels=10);
+
  
+ #SOil Orga Content 
+ 
+ head(SoilLayersCN.Data)[,89:97]
+ 
+ 
+ SORGC.data<-SoilLayersCN.Data[SoilLayersCN.Data$Year==80,c(97:89,129,130)]  ;
+ head(SORGC.data)
+ 
+ SORGC.data.Matrix_neg<-as.matrix(SORGC.data[,1:9]) ;
+ 
+ 
+ 
+ 
+ filled.contour(x=Test.data[,"DOY"], y=SoilLayers.depth_m[9:1,3], z=SORGC.data.Matrix_neg , color.palette=rainbow,nlevels=10);
  
  
