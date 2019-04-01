@@ -78,219 +78,79 @@ dir.create("SoilGraphOutput") ;
  
  SoilLayersCN.Data$DOY<-as.POSIXlt(SoilLayersCN.Data$DATE...YYYY.MM.DD)[,"yday"]  ;
  
- SoilLayersCN.Data$Year<-as.POSIXlt(SoilLayersCN.Data$DATE...YYYY.MM.DD)  ;
+ SoilLayersCN.Data$Year<-as.factor(as.POSIXlt(SoilLayersCN.Data$DATE...YYYY.MM.DD)[,"year"])  ;
  
- SoilLayersCN.Data$Year.factor<-as.factor(SoilLayersCN.Data$Year)  ;
+ str(SoilLayersCN.Data$Year)
  
- Test.data<-SoilLayersCN.Data[SoilLayersCN.Data$Year.factor==80,c(1:12,129)]
+ levels(SoilLayersCN.Data$Year)
+ 
+ Test.data<-SoilLayersCN.Data[SoilLayersCN.Data$Year==80,c(1:12,129,130)]  ;
  
  head(Test.data)
+ str(Test.data)
+ 
+ # Soil Layers
+ # 1-0.00
+ # 2-0.05
+ # 3-0.10
+ # 4-0.20
+ # 5-0.40
+ # 6-0.60
+ # 7-0.80
+ # 8-1.00
+ # 9-1.20
+ 
+ SoilLayers.depth_m<-data.frame(SoilLayersCN.Labels.2[3:11],c(0.01, 0.05, 0.10, 0.20, 0.40, 0.60, 0.80, 1.00, 1.20));
+ names(SoilLayers.depth_m)<-c("LAYER", "Depth_m") ;
+ 
+ SoilLayers.depth_m<-data.frame(SoilLayersCN.Labels.2[3:11],c(0.01, 0.05, 0.10, 0.20, 0.40, 0.60, 0.80, 1.00, 1.20),c(-0.01, -0.05, -0.10, -0.20, -0.40, -0.60, -0.80, -1.00, -1.20));
+ 
+ names(SoilLayers.depth_m)<-c("LAYER", "Depth_m", "Depth_m_neg") ;
+
+ 
+# plot a contour plot of the variable as func tion of time and soil depth
+# arrange the data for plotting in a matrix with x=time, y=layer, z=variable value
+
+ NO3Matrix<-as.matrix(Test.data[,3:11]) ;
+ 
+ NO3Matrix_neg<-as.matrix(Test.data[,11:3]) ;
  
  
-# Soil Layers
-# 1-0.00
-# 2-0.05
-# 3-0.10
-# 4-0.20
-# 5-0.40
-# 6-0.60
-# 7-0.80
-# 8-1.00
-# 9-1.20
-
  
-
-
-
- head(SoilLayersCN.Data$DOY)
- 
-SoilLayersCN.Data$DOY
+ head(NO3Matrix)
+ head(NO3Matrix_neg)
  
  
-  Nitrogen.dat.cols<-c("character", "NULL", "NULL","NULL","NULL","NULL","NULL","NULL", "NULL","NULL","NULL", "NULL" , NA , "NULL") ;
-  
-  Nitrogen.dat<-read.table(paste0("./",i,"/N.dat"), header=F , skip=2 , sep="\t" , as.is= T ,colClasses =Nitrogen.dat.cols )  ;
-  
-  ####
-  
-  
-  
-  Nitrogen.dat.names<-read.table(paste0("./",i,"/N.dat"), header=T, nrows=1, sep="\t", colClasses =Nitrogen.dat.cols )   ;
-  
-  names(Nitrogen.dat)<-names(Nitrogen.dat.names) ;
-  
-  head(Nitrogen.dat)  ;   str(Nitrogen.dat)   ;
-  
-  
-  Nitrogen.dat$DATE<-as.Date(Nitrogen.dat$DATE,format="%F" )  ;
-  
-  
-  
-  #   Read The Maize.dat file
-  
-  
-  ######  Read only the columns that are wanted  
-  
-  #read.table("./ROSE Simulation Work/High C no cover crop/High C no cover crop 84-15/Maize.dat" , header=F, nrows=1, sep='\t') ;
-  
-  
-  
-  Maize.dat.cols<-c("character", "character" , "character", "NULL","NULL","NULL","NULL","NULL","NULL", "NULL","NULL","NULL", "NULL" , "NULL" , "NULL" , "NULL", "NULL") ;
-  
-  Maize.dat<-read.table(paste0("./",i,"/Maize.dat"), header=F, skip=2,sep='\t',colClasses =Maize.dat.cols) ;
-  
-  Maize.dat.names<-read.table(paste0("./",i,"/Maize.dat"), header=T, nrows=1, sep='\t',colClasses =Maize.dat.cols) ;
-  
-  names(Maize.dat)<-names(Maize.dat.names)   ;
-  
-  
-  Maize.dat$DATE<-as.Date(Maize.dat$DATE,format="%F" )  ;
-  
-  head(Maize.dat)  ;   str(Maize.dat)  ;
-  
-  
-  
-  #   Read The Soybean.dat file
-  
-  
-  ######  Read only the columns that are wanted  
-  
-  #read.table("./ROSE Simulation Work/High C no cover crop/High C no cover crop 84-15/Soybean.dat" , header=F, nrows=1, sep='\t') ;
-  
-  Soy.dat.cols<-c("character", "character" , "character", "NULL","NULL","NULL","NULL","NULL","NULL", "NULL","NULL","NULL", "NULL" , "NULL" , "NULL" , "NULL", "NULL") ;
-  
-  Soy.dat<-read.table(paste0("./",i,"/Soybean.dat"), header=F, skip=2,sep='\t',colClasses =Soy.dat.cols) ;
-  
-  Soy.dat.names<-read.table(paste0("./",i,"/Soybean.dat"), header=T, nrows=1, sep='\t',colClasses =Maize.dat.cols) ;
-  
-  
-  names(Soy.dat)<-names(Soy.dat.names)   ;
-  
-  Soy.dat$DATE<-as.Date(Soy.dat$DATE,format="%F" )  ;
-  
-  head(Soy.dat)  ;   str(Soy.dat)  ;
-  
-  
-  ###############################################################################################################
-  #                        Merge the datasets into a dataframe     
-  ###############################################################################################################
-  
-  Crop.dat<-merge(Maize.dat,Soy.dat,by="DATE");
-  
-  head(Crop.dat)  ;   str(Crop.dat)  ;
-  
-  
-  
-  Nleach.dat<-merge(Crop.dat,Nitrogen.dat, by ="DATE")  ;
-  
-  names(Nleach.dat)[c(2:5)]<-c("Maize", "Maize_Stage" ,"Soy", "Soy_Stage") ;
-  
-  
-  head(Nleach.dat)  ;   str(Nleach.dat)  ;
-  
-  ############## Converting the charracter data for crop and crop stage into factors 
-  
-  Nleach.dat$Maize<-as.factor(Nleach.dat$Maize);
-  
-  levels(Nleach.dat$Maize)<-c("Fallow", "Maize" , "No_Crop") ;
-  
-  Nleach.dat$Maize_Stage<-as.factor(Nleach.dat$Maize_Stage);
-  
-  levels(Nleach.dat$Maize_Stage)<-c("Maturity" , "n/a" , "Planting" , "Pre_emergence" , "Reproductive_Growth" , "Vegetative_growth")   ;
-  
-  
-  Nleach.dat$Soy<-as.factor(Nleach.dat$Soy)  ;
-  
-  levels(Nleach.dat$Soy)<-c("Fallow" , "No_Crop" , "Soybean") ;
-  
-  Nleach.dat$Soy_Stage<-as.factor(Nleach.dat$Soy_Stage);
-  
-  levels(Nleach.dat$Soy_Stage)<-c("Maturity" , "n/a" , "Planting" , "Pre_emergence" , "Reproductive_Growth" , "Vegetative_growth")   ;
-  
-  
-  plot(Nleach.dat$DATE,Nleach.dat$NO3.LEACHING,type="l");
-  
-  
-  ###############################################################################################################
-  #                       Select periods of Corn to Soy bean to calculate cummulative leaching
-  ###############################################################################################################
-  
-  Nleach.Corn.Soy.dat<-Nleach.dat[Nleach.dat$Maize_Stage == "Planting" |  Nleach.dat$Soy_Stage == "Maturity"  ,]  ;
-  
-  
-  #  Get rid of the dates with multiple maturities
-  
-  Select.Periods<-(Nleach.Corn.Soy.dat$DATE[c(seq(2,length(Nleach.Corn.Soy.dat$DATE)),length(Nleach.Corn.Soy.dat$DATE))] - Nleach.Corn.Soy.dat$DATE)==0 | (Nleach.Corn.Soy.dat$DATE[c(seq(2,length(Nleach.Corn.Soy.dat$DATE)),length(Nleach.Corn.Soy.dat$DATE))] - Nleach.Corn.Soy.dat$DATE) >1 
-  
-  
-  
-  # extract correct periods 
-  
-  Nleach.Periods<-Nleach.Corn.Soy.dat[Select.Periods,]
-  
-  
-  # Initialize the data frame to store the cumulative leaching
-  
-  Nleach.cum<-data.frame()   ;
-  
-  
-  for (j in seq (1, dim(Nleach.Periods)[1]-2,2)) {
-    
-    print(j)
-    
-    Cum.leaching<-Nleach.Periods[c(j,j+1), c("DATE", "NO3.LEACHING")] 
-    
-    Cum.leaching
-    
-    days=seq.Date(Nleach.Periods$DATE[j],Nleach.Periods$DATE[j+1],"day")   ;
-    
-    head(days) ; tail(days)  ;
-    
-    Cum.leaching[,2]=sum(Nleach.dat[Nleach.dat$DATE %in% days,c("NO3.LEACHING")])   ;
-    
-    Cum.leaching
-    
-    
-    Nleach.cum<-rbind(Nleach.cum,Cum.leaching)     ;
-    
-    Nleach.cum
-    
-    
-    
-    rm(Cum.leaching,days) ;
-    
-    
-  }
-  
-  
-  
-  
-  Nleach.cum$File_Name<-i  ;
-  
-  
-  Summary.High_C_no_cover<-rbind(Summary.High_C_no_cover,Nleach.cum)    ;
-  
-  Data_to_Remove<-ls()[!ls() %in% c("Summary.High_C_no_cover","i")]
-  
-  rm(Data_to_Remove)     ;
-  
-  
-}
+ str(NO3Matrix)
+ 
+ filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[,2],z=NO3Matrix,color.palette=rainbow,nlevels=10);
+ 
+ filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[9:1,3],z=NO3Matrix_neg,color.palette=rainbow,nlevels=10);
 
-###############################################################################################################
-#                          Sumarixing the results and writing them into excell               
-###############################################################################################################
+ #Plot the other variables and other years
+ 
+ head(SoilLayersCN.Data)[,99:107]
+ 
+ str(SoilLayersCN.Data)
+ 
+ NH4.data<-SoilLayersCN.Data[SoilLayersCN.Data$Year==80,c(21:13,129,130)]  ;
+ 
+ NH4.Matrix_neg<-as.matrix(NH4.data[,1:9]) ;
 
+ head(NH4.Matrix_neg) 
+ 
+ filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[9:1,3],z=NH4.Matrix_neg,color.palette=rainbow,nlevels=10);
+ 
 
-Summary.High_C_no_cover
-
-Summary.High_C_no_cover$Start.year<-as.numeric(format(as.Date(substr(Summary.High_C_no_cover$File_Name,start=21, stop=23),format="%y"), "%Y")  ) ;
-
-Summary.High_C_no_cover<-Summary.High_C_no_cover[order(Summary.High_C_no_cover$Start.year,Summary.High_C_no_cover$DATE),]   ;
-
-Summary.High_C_no_cover$DATE<-format(Summary.High_C_no_cover$DATE,"%F")    ;
-
-Summary.High_C_no_cover<-Summary.High_C_no_cover[,c("Start.year", "DATE", "NO3.LEACHING", "File_Name")]      ;
-
-writeWorksheetToFile("../OutputSummary/Summary.xlsx",Summary.High_C_no_cover, sheet="High_C_no_cover" )      ; 
-
+ Water.data<-SoilLayersCN.Data[SoilLayersCN.Data$Year==80,c(107:99,129,130)]  ;
+ head(Water.data)
+ 
+ Water.data.Matrix_neg<-as.matrix(Water.data[,1:9]) ;
+ 
+ 
+ 
+ 
+ filled.contour(x=Test.data[,"DOY"], y=SoilLayers.depth_m[9:1,3], z=Water.data.Matrix_neg , color.palette=rainbow,nlevels=10);
+ 
+ 
+ 
