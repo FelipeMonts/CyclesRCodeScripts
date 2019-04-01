@@ -125,7 +125,7 @@ dir.create("SoilGraphOutput") ;
  
  filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[,2],z=NO3Matrix,color.palette=rainbow,nlevels=10);
  
- filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[9:1,3],z=NO3Matrix_neg,color.palette=rainbow,nlevels=10);
+ filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[9:1,3],z=NO3Matrix_neg,color.palette=rainbow,nlevels=10,plot.title= title(main="NO3"));
 
  #Plot the other variables and other years
  
@@ -141,7 +141,7 @@ dir.create("SoilGraphOutput") ;
 
  head(NH4.Matrix_neg) 
  
- filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[9:1,3],z=NH4.Matrix_neg,color.palette=rainbow,nlevels=10);
+ filled.contour(x=Test.data[,"DOY"],y=SoilLayers.depth_m[9:1,3],z=NH4.Matrix_neg,color.palette=rainbow,nlevels=10, plot.title= title(main="NH4"));
  
  
  #Water Content
@@ -154,7 +154,7 @@ dir.create("SoilGraphOutput") ;
  
  
  
- filled.contour(x=Test.data[,"DOY"], y=SoilLayers.depth_m[9:1,3], z=Water.data.Matrix_neg , color.palette=rainbow,nlevels=10);
+ filled.contour(x=Test.data[,"DOY"], y=SoilLayers.depth_m[9:1,3], z=Water.data.Matrix_neg , color.palette=rainbow,nlevels=10,plot.title= title(main="Water Content"));
 
  
  #SOil Orga Content 
@@ -170,6 +170,6 @@ dir.create("SoilGraphOutput") ;
  
  
  
- filled.contour(x=Test.data[,"DOY"], y=SoilLayers.depth_m[9:1,3], z=SORGC.data.Matrix_neg , color.palette=rainbow,nlevels=10);
+ filled.contour(x=Test.data[,"DOY"], y=SoilLayers.depth_m[9:1,3], z=SORGC.data.Matrix_neg , color.palette=rainbow,nlevels=10, plot.title= title(main="Organic Carbon"));
  
  
