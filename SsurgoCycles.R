@@ -48,7 +48,7 @@ setwd('C:/Felipe/CYCLES/CyclesRCodeScripts/CyclesRCodeScripts/SSurgoSoilsCycles'
 
 # Install the packages that are needed #
 
-
+# install.packages("tidyr")
 # install.packages("raster", dep = TRUE)
 # install.packages('Hmisc', dep=TRUE)
 # install.packages('soilDB', dep=TRUE) # stable version from CRAN + dependencies
@@ -78,6 +78,8 @@ library(aqp) ;
 library(plyr) ;
 
 library(reshape2) ;
+
+library(tidyr) ;
 
 
 
@@ -242,9 +244,13 @@ plot(Mukey.Pedon, name='hzname',color='dbthirdbar_r')  ;
 #                             needed for Cycles
 ###############################################################################################################
 
-slab(Mukey.Pedon)
+Cycles.soil.data<-slab(Mukey.Pedon,fm = ~sandtotal_r, slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
+
+dcast(Cycles.soil.data, 
 
 
+
+slab(Mukey.Pedon,fm = ~sandtotal_r + silttotal_r + om_r + dbthirdbar_r,slab.structure = c(0,5,10,20,40,60,80,100),slab.fun =mean )
 
 
 
