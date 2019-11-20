@@ -49,6 +49,7 @@ setwd('C:/Felipe/CYCLES/CyclesRCodeScripts/CyclesRCodeScripts/SSurgoSoilsCycles'
 # Install the packages that are needed #
 
 # install.packages("tidyr")
+# install.packages("dplyr")
 # install.packages("raster", dep = TRUE)
 # install.packages('Hmisc', dep=TRUE)
 # install.packages('soilDB', dep=TRUE) # stable version from CRAN + dependencies
@@ -75,7 +76,7 @@ library(soilDB) ;
 
 library(aqp) ;
 
-library(plyr) ;
+library(dplyr) ;
 
 library(reshape2) ;
 
@@ -172,7 +173,7 @@ in.statement2 <- format_SQL_in_statement(MUKEYS);
 Pedon.query<- paste0("SELECT component.mukey, component.cokey, compname, comppct_r, majcompflag, slope_r, hzdept_r, hzdepb_r,hzthk_r, hzname, awc_r, sandtotal_r, silttotal_r, claytotal_r, om_r,dbtenthbar_r, dbthirdbar_r, dbfifteenbar_r, fraggt10_r, frag3to10_r, sieveno10_r, sieveno40_r, sieveno200_r, ksat_r  FROM component JOIN chorizon ON component.cokey = chorizon.cokey AND mukey IN ", in.statement2," ORDER BY mukey, comppct_r DESC, hzdept_r ASC") ;
 
 # now get component and horizon-level data for these map unit keys
-Pedon.info<- SDA_query(Pedon.query);
+Pedon.info<-SDA_query(Pedon.query);
 head(Pedon.info) ;
 str(Pedon.info)  ;
 
@@ -231,11 +232,12 @@ str(Mukey.Pedon);
 #Pedon.info$name<-Pedon.info$hzname ;
 
 depths(Mukey.Pedon)<-mukey_ID ~ hzdept_r + hzdepb_r  ;
-str(Mukey.Pedon) ;
+str(Mukey.Pedon@horizons) ;
 
 
 plot(Mukey.Pedon, name='hzname',color='dbthirdbar_r')  ;
 
+plot(Mukey.Pedon[3:5,], name='hzname',color='sandtotal_r')  ;
 
 
 
@@ -244,35 +246,31 @@ plot(Mukey.Pedon, name='hzname',color='dbthirdbar_r')  ;
 #                             needed for Cycles
 ###############################################################################################################
 
-Cycles.soil.data<-slab(Mukey.Pedon,fm = ~sandtotal_r, slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
 
-dcast(Cycles.soil.data, 
+plot(Mukey.Pedon,name='hzname',color='dbthirdbar_r')
 
-
-
-slab(Mukey.Pedon,fm = ~sandtotal_r + silttotal_r + om_r + dbthirdbar_r,slab.structure = c(0,5,10,20,40,60,80,100),slab.fun =mean )
+Cycles.soil.data<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
 
 
+Cycles.soil.data.2<-Cycles.soil.data %>%
+  spread(key = variable, value=value )
+
+str(Cycles.soil.data.2)
+
+depths(Cycles.soil.data.2)<-mukey_ID ~ top + bottom 
+
+Cycles.soil.data.2$hzname <- profileApply(Cycles.soil.data.2, function(i) {paste0('Cycles-', 1:nrow(i))})
+
+str(Cycles.soil.data.2@horizons)
+
+View(Cycles.soil.data.2@horizons)
 
 
+plot(Mukey.Pedon, name='hzname',color='sandtotal_r')  ;
 
-######### Use the slice tool to divide the horizons into 1 cm layers and sum the components (clay, sand, silt) multiplied by 
-#########  the thincknes (1cm) and the bulk density dbthirdbar_r to obtain the wieghted clay, sand, etc for pihm
-
-
-sliced<-aqp::slice(Mukey.Pedon, fm = 1:max(Mukey.Pedon) ~ sandtotal_r + silttotal_r + claytotal_r + om_r + dbthirdbar_r + mukey.factor ) ;
-
-
-
-
-plot(sliced, name='hzname', color='om_r') ;
-
-str(sliced) ;
-
+plot(Cycles.soil.data.2,  name='hzname', color='sandtotal_r')
 
 
 
-
-d <- ldply(1:9, random_profile, n=c(6, 7, 8), n_prop=1, method='LPP')
 
 
