@@ -48,19 +48,14 @@ setwd('C:/Felipe/CYCLES/CyclesRCodeScripts/CyclesRCodeScripts/SSurgoSoilsCycles'
 
 # Install the packages that are needed #
 
-# install.packages("tidyr")
-# install.packages("dplyr")
-# install.packages("raster", dep = TRUE)
-# install.packages('Hmisc', dep=TRUE)
 # install.packages('soilDB', dep=TRUE) # stable version from CRAN + dependencies
 # install.packages("soilDB", repos="http://R-Forge.R-project.org") # most recent copy from r-forge
-# install.packages("SSOAP", repos = "http://www.omegahat.org/R", type="source") # SSOAP and XMLSchema
+
 # install.packages("rgdal", dep = TRUE)
 
-# install.packages("rgeos", dep = TRUE)
-# install.packages("RColorBrewer")
-# install.packages("latticeExtra")
 # install.packages("aqp", dep=TRUE)
+
+# install.packages("reshape2", dep=TRUE)
 
 
 
@@ -76,11 +71,9 @@ library(soilDB) ;
 
 library(aqp) ;
 
-library(dplyr) ;
-
 library(reshape2) ;
 
-library(tidyr) ;
+
 
 
 
@@ -252,8 +245,8 @@ plot(Mukey.Pedon,name='hzname',color='dbthirdbar_r')
 Cycles.soil.data<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
 
 
-Cycles.soil.data.2<-Cycles.soil.data %>%
-  spread(key = variable, value=value )
+Cycles.soil.data.2<-dcast(Cycles.soil.data, mukey_ID + top + bottom ~ variable)
+
 
 str(Cycles.soil.data.2)
 
