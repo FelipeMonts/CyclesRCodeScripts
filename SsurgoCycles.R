@@ -240,30 +240,44 @@ plot(Mukey.Pedon[3:5,], name='hzname',color='sandtotal_r')  ;
 ###############################################################################################################
 
 
-plot(Mukey.Pedon,name='hzname',color='dbthirdbar_r')
-
-Cycles.soil.data<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
+Mukey.Pedon.Cycles.Slabs<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
 
 
-Cycles.soil.data.2<-dcast(Cycles.soil.data, mukey_ID + top + bottom ~ variable)
+Mukey.Pedon.Cycles<-dcast(Mukey.Pedon.Cycles.Slabs, mukey_ID + top + bottom ~ variable) ;
 
 
-str(Cycles.soil.data.2)
+str(Mukey.Pedon.Cycles)
 
-depths(Cycles.soil.data.2)<-mukey_ID ~ top + bottom 
+depths(Mukey.Pedon.Cycles)<-mukey_ID ~ top + bottom  ;
 
-Cycles.soil.data.2$hzname <- profileApply(Cycles.soil.data.2, function(i) {paste0('Cycles-', 1:nrow(i))})
+Mukey.Pedon.Cycles$hzname <- profileApply(Mukey.Pedon.Cycles, function(i) {paste0('Cycles-', 1:nrow(i))}) ;
 
-str(Cycles.soil.data.2@horizons)
-
-View(Cycles.soil.data.2@horizons)
+str(Mukey.Pedon.Cycles@horizons) 
 
 
 plot(Mukey.Pedon, name='hzname',color='sandtotal_r')  ;
 
-plot(Cycles.soil.data.2,  name='hzname', color='sandtotal_r')
+plot(Mukey.Pedon.Cycles,  name='hzname', color='sandtotal_r') ;
 
 
+###############################################################################################################
+#                           Use the slab funtion on the AQP package to obtain the average parameters for the 
+#                             0 to 20 cm aggregation
+###############################################################################################################
 
 
+Mukey.Pedon.Slabs_Cycles_0_20<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,20) , slab.fun=mean,na.rm=T ) ;
 
+
+Mukey.Pedon.Cycles_0_20<-dcast(Mukey.Pedon.Slabs_Cycles_0_20, mukey_ID + top + bottom ~ variable)
+
+str(Mukey.Pedon.Cycles_0_20)
+
+
+depths(Mukey.Pedon.Cycles_0_20)<-mukey_ID ~ top + bottom  ;
+
+Mukey.Pedon.Cycles_0_20$hzname <- profileApply(Mukey.Pedon.Cycles_0_20, function(i) {paste0('Cycles-', 1:nrow(i))}) ;
+
+str(Mukey.Pedon.Cycles_0_20@horizons) 
+
+plot(Mukey.Pedon.Cycles_0_20,  name='hzname', color='sandtotal_r') ;
