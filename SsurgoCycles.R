@@ -281,3 +281,7 @@ Mukey.Pedon.Cycles_0_20$hzname <- profileApply(Mukey.Pedon.Cycles_0_20, function
 str(Mukey.Pedon.Cycles_0_20@horizons) 
 
 plot(Mukey.Pedon.Cycles_0_20,  name='hzname', color='sandtotal_r') ;
+
+
+
+
