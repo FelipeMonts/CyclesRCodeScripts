@@ -1,7 +1,7 @@
 ##############################################################################################################
 # 
 # 
-# Program to get soil files for cycles
+# Program to get soil files for cycles from a shape file and a raster fiel
 # 
 #     
 # 
@@ -163,7 +163,7 @@ in.statement2 <- format_SQL_in_statement(MUKEYS);
 
 # format query in SQL- raw data are returned
 
-Pedon.query<- paste0("SELECT component.mukey, component.cokey, compname, comppct_r, majcompflag, slope_r, hzdept_r, hzdepb_r,hzthk_r, hzname, awc_r, sandtotal_r, silttotal_r, claytotal_r, om_r,dbtenthbar_r, dbthirdbar_r, dbfifteenbar_r, fraggt10_r, frag3to10_r, sieveno10_r, sieveno40_r, sieveno200_r, ksat_r  FROM component JOIN chorizon ON component.cokey = chorizon.cokey AND mukey IN ", in.statement2," ORDER BY mukey, comppct_r DESC, hzdept_r ASC") ;
+Pedon.query<- paste0("SELECT component.mukey, component.cokey, component.compname, component.taxorder, component.taxsuborder, component.taxgrtgroup, component.taxsubgrp, comppct_r, majcompflag, slope_r, hzdept_r, hzdepb_r,hzthk_r, hzname, awc_r, sandtotal_r, silttotal_r, claytotal_r, om_r,dbtenthbar_r, dbthirdbar_r, dbfifteenbar_r, fraggt10_r, frag3to10_r, sieveno10_r, sieveno40_r, sieveno200_r, ksat_r, hydgrp  FROM component JOIN chorizon ON component.cokey = chorizon.cokey AND mukey IN ", in.statement2," ORDER BY mukey, comppct_r DESC, hzdept_r ASC") ;
 
 # now get component and horizon-level data for these map unit keys
 Pedon.info<-SDA_query(Pedon.query);
@@ -230,7 +230,7 @@ str(Mukey.Pedon@horizons) ;
 
 plot(Mukey.Pedon, name='hzname',color='dbthirdbar_r')  ;
 
-plot(Mukey.Pedon[3:5,], name='hzname',color='sandtotal_r')  ;
+plot(Mukey.Pedon[3:10,], name='hzname',color='hydgrp')  ;
 
 
 
@@ -281,6 +281,8 @@ Mukey.Pedon.Cycles_0_20$hzname <- profileApply(Mukey.Pedon.Cycles_0_20, function
 str(Mukey.Pedon.Cycles_0_20@horizons) 
 
 plot(Mukey.Pedon.Cycles_0_20,  name='hzname', color='sandtotal_r') ;
+
+
 
 
 
