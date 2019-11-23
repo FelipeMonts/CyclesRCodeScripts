@@ -73,7 +73,7 @@ library(aqp) ;
 
 library(reshape2) ;
 
-
+library(openxlsx);
 
 
 
@@ -284,6 +284,51 @@ plot(Mukey.Pedon.Cycles_0_20,  name='hzname', color='sandtotal_r') ;
 
 
 
+###############################################################################################################
+#                            Get the curve number from the hydrology condition in surgo and the 
+#                             crop type from the TR55 publication
+#                          "Urban Hydrology for Small Watersheds TR-55." 1986. USDA-NRCS.
+#                      https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb1044171.pdf.
+#
+###############################################################################################################
 
+
+
+### Read the table comiled in the excel file CurveNumberTR55.xlsx
+### for the future, the tables for Ag and pasture and arid lands can be combined iot one and can be used for everything 
+
+
+TR55_AgLands.table<-read.xlsx('C:\\Felipe\\CYCLES\\CyclesRCodeScripts\\CurveNumberTR55.xlsx', sheet='CultivatedAgriculture',startRow=2)
+
+
+str(TR55_AgLands.table)
+
+### Transform the table wide format into a long format with the melt fuction in the reshape2 package
+
+TR55_AgLands<-melt(TR55_AgLands.table, id.vars=c('Cover.type', 'Treatment' , 'Hydrologic.condition'), measure.vars=c('A' , 'B' , 'C' , 'D'), variable.name ='HydrologicSoilGroup', value.name = 'Curve.Number')  ;
+
+
+str(TR55_AgLands)
+
+
+### completing the variables missing from the SSURGO query
+
+str(Mukey.Pedon@horizons)
+
+View(Mukey.Pedon@horizons)
+
+Mukey.Pedon@horizons$Cover.type<-c('Row crops') ;
+Mukey.Pedon@horizons$Treatment<-c('SR');
+Mukey.Pedon@horizons$Hydrologic.condition<-c('Good') ;
+
+### Link the pedon data frame  with the TR55 data frame to get the curve number
+
+Pedon.dataframe<-Mukey.Pedon@horizons ;
+
+Mukey.Pedon@horizons<-merge(Pedon.dataframe,TR55_AgLands,by.x=c('Cover.type', 'Treatment' , 'Hydrologic.condition', 'hydgrp'), by.y=c('Cover.type', 'Treatment' , 'Hydrologic.condition','HydrologicSoilGroup' ), all.x=T) ;
+
+Mukey.Pedon@horizons[order(Mukey.Pedon@horizons$mukey),]
+
+str(Mukey.Pedon)
 
 
