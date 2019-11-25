@@ -57,6 +57,8 @@ setwd('C:/Felipe/CYCLES/CyclesRCodeScripts/CyclesRCodeScripts/SSurgoSoilsCycles'
 
 # install.packages("reshape2", dep=TRUE)
 
+#install.packages("openxlsx", dep=TRUE)
+
 
 
 
@@ -163,13 +165,22 @@ in.statement2 <- format_SQL_in_statement(MUKEYS);
 
 # format query in SQL- raw data are returned
 
-Pedon.query<- paste0("SELECT component.mukey, component.cokey, component.compname, component.taxorder, component.taxsuborder, component.taxgrtgroup, component.taxsubgrp, comppct_r, majcompflag, slope_r, hzdept_r, hzdepb_r,hzthk_r, hzname, awc_r, sandtotal_r, silttotal_r, claytotal_r, om_r,dbtenthbar_r, dbthirdbar_r, dbfifteenbar_r, fraggt10_r, frag3to10_r, sieveno10_r, sieveno40_r, sieveno200_r, ksat_r, hydgrp  FROM component JOIN chorizon ON component.cokey = chorizon.cokey AND mukey IN ", in.statement2," ORDER BY mukey, comppct_r DESC, hzdept_r ASC") ;
+
+ # Pedon.query<- paste0("SELECT component.mukey, component.cokey, component.compname, component.taxorder, component.taxsuborder, component.taxgrtgroup, component.taxsubgrp, comppct_r, majcompflag, slope_r, hzdept_r, hzdepb_r,hzthk_r, hzname, awc_r, sandtotal_r, silttotal_r, claytotal_r, om_r,dbtenthbar_r, dbthirdbar_r, dbfifteenbar_r, fraggt10_r, frag3to10_r, sieveno10_r, sieveno40_r, sieveno200_r, ksat_r, hydgrp  FROM component JOIN chorizon ON component.cokey = chorizon.cokey AND mukey IN", in.statement2," ORDER BY component.mukey, comppct_r DESC, hzdept_r ASC") ;
+ # 
+
+
+Pedon.query<- paste0("SELECT muaggatt.mukey, muaggatt.musym, muaggatt.drclassdcd, muaggatt.hydgrpdcd, component.mukey, component.cokey, component.compname, component.taxorder, component.taxsuborder, component.taxgrtgroup, component.taxsubgrp, comppct_r, majcompflag, slope_r, hzdept_r, hzdepb_r,hzthk_r, hzname, awc_r, sandtotal_r, silttotal_r, claytotal_r, om_r,dbtenthbar_r, dbthirdbar_r, dbfifteenbar_r, fraggt10_r, frag3to10_r, sieveno10_r, sieveno40_r, sieveno200_r, ksat_r, hydgrp  FROM component JOIN chorizon ON component.cokey = chorizon.cokey
+                     JOIN muaggatt ON muaggatt.mukey = component.mukey AND component.mukey IN", in.statement2," ORDER BY component.mukey, comppct_r DESC, hzdept_r ASC") ;
+
 
 # now get component and horizon-level data for these map unit keys
 Pedon.info<-SDA_query(Pedon.query);
 head(Pedon.info) ;
 str(Pedon.info)  ;
 
+
+View(Pedon.info)
 
 # filter components that are the major components of each unit map with the Flag majcompflag=='Yes'
 
@@ -235,56 +246,6 @@ plot(Mukey.Pedon[3:10,], name='hzname',color='hydgrp')  ;
 
 
 ###############################################################################################################
-#                           Use the slab funtion on the AQP package to obtain the parameters at the layers
-#                             needed for Cycles
-###############################################################################################################
-
-
-Mukey.Pedon.Cycles.Slabs<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
-
-
-Mukey.Pedon.Cycles<-dcast(Mukey.Pedon.Cycles.Slabs, mukey_ID + top + bottom ~ variable) ;
-
-
-str(Mukey.Pedon.Cycles)
-
-depths(Mukey.Pedon.Cycles)<-mukey_ID ~ top + bottom  ;
-
-Mukey.Pedon.Cycles$hzname <- profileApply(Mukey.Pedon.Cycles, function(i) {paste0('Cycles-', 1:nrow(i))}) ;
-
-str(Mukey.Pedon.Cycles@horizons) 
-
-
-plot(Mukey.Pedon, name='hzname',color='sandtotal_r')  ;
-
-plot(Mukey.Pedon.Cycles,  name='hzname', color='sandtotal_r') ;
-
-
-###############################################################################################################
-#                           Use the slab funtion on the AQP package to obtain the average parameters for the 
-#                             0 to 20 cm aggregation
-###############################################################################################################
-
-
-Mukey.Pedon.Slabs_Cycles_0_20<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,20) , slab.fun=mean,na.rm=T ) ;
-
-
-Mukey.Pedon.Cycles_0_20<-dcast(Mukey.Pedon.Slabs_Cycles_0_20, mukey_ID + top + bottom ~ variable)
-
-str(Mukey.Pedon.Cycles_0_20)
-
-
-depths(Mukey.Pedon.Cycles_0_20)<-mukey_ID ~ top + bottom  ;
-
-Mukey.Pedon.Cycles_0_20$hzname <- profileApply(Mukey.Pedon.Cycles_0_20, function(i) {paste0('Cycles-', 1:nrow(i))}) ;
-
-str(Mukey.Pedon.Cycles_0_20@horizons) 
-
-plot(Mukey.Pedon.Cycles_0_20,  name='hzname', color='sandtotal_r') ;
-
-
-
-###############################################################################################################
 #                            Get the curve number from the hydrology condition in surgo and the 
 #                             crop type from the TR55 publication
 #                          "Urban Hydrology for Small Watersheds TR-55." 1986. USDA-NRCS.
@@ -330,5 +291,81 @@ Mukey.Pedon@horizons<-merge(Pedon.dataframe,TR55_AgLands,by.x=c('Cover.type', 'T
 Mukey.Pedon@horizons[order(Mukey.Pedon@horizons$mukey),]
 
 str(Mukey.Pedon)
+
+
+
+
+
+
+###############################################################################################################
+#                           Use the slab funtion on the AQP package to obtain the parameters at the layers
+#                             needed for Cycles
+###############################################################################################################
+
+
+Mukey.Pedon.Cycles.Slabs<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r + hydgrp +, slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
+
+
+Mukey.Pedon.Cycles<-dcast(Mukey.Pedon.Cycles.Slabs, mukey_ID + top + bottom ~ variable) ;
+
+
+str(Mukey.Pedon.Cycles)
+
+depths(Mukey.Pedon.Cycles)<-mukey_ID ~ top + bottom  ;
+
+Mukey.Pedon.Cycles$hzname <- profileApply(Mukey.Pedon.Cycles, function(i) {paste0('Cycles-', 1:nrow(i))}) ;
+
+str(Mukey.Pedon.Cycles@horizons) 
+
+
+plot(Mukey.Pedon, name='hzname',color='sandtotal_r')  ;
+
+plot(Mukey.Pedon.Cycles,  name='hzname', color='sandtotal_r') ;
+
+
+###############################################################################################################
+#                           Use the slab funtion on the AQP package to obtain the average parameters for the 
+#                             0 to 20 cm aggregation
+###############################################################################################################
+
+
+Mukey.Pedon.Slabs_Cycles_0_20<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,20) , slab.fun=mean,na.rm=T ) ;
+
+
+Mukey.Pedon.Cycles_0_20<-dcast(Mukey.Pedon.Slabs_Cycles_0_20, mukey_ID + top + bottom ~ variable)  ;
+
+str(Mukey.Pedon.Cycles_0_20)
+
+
+depths(Mukey.Pedon.Cycles_0_20)<-mukey_ID ~ top + bottom  ;
+
+Mukey.Pedon.Cycles_0_20$hzname <- profileApply(Mukey.Pedon.Cycles_0_20, function(i) {paste0('Cycles-', 1:nrow(i))}) ;
+
+str(Mukey.Pedon.Cycles_0_20@horizons) 
+
+plot(Mukey.Pedon.Cycles_0_20,  name='hzname', color='sandtotal_r') ;
+
+
+
+###############################################################################################################
+#                           Use the slab funtion on the AQP package to obtain the average parameters for the 
+#                             0 to 100 cm aggregation
+###############################################################################################################
+
+Mukey.Pedon.Slabs_Cycles_0_100<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,100) , slab.fun=mean,na.rm=T ) ;
+
+
+Mukey.Pedon.Cycles_0_100<-dcast(Mukey.Pedon.Slabs_Cycles_0_100, mukey_ID + top + bottom ~ variable)  ;
+
+str(Mukey.Pedon.Cycles_0_100)
+
+depths(Mukey.Pedon.Cycles_0_100)<-mukey_ID ~ top + bottom  ;
+
+
+Mukey.Pedon.Cycles_0_100$hzname <- profileApply(Mukey.Pedon.Cycles_0_100, function(i) {paste0('Cycles-', 1:nrow(i))}) ;
+
+str(Mukey.Pedon.Cycles_0_100@horizons) 
+
+plot(Mukey.Pedon.Cycles_0_100,  name='hzname', color='sandtotal_r') ;
 
 
