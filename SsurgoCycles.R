@@ -89,13 +89,13 @@ library(openxlsx);
 ########### Read infromation about the shape files ###########
 
 
-Project.mesh.info<-ogrInfo('C:/Felipe/PIHM-CYCLES/PIHM/PIHM SIMULATIONS/YAHARA/Oct0920191330/DomainDecomposition/MergeFeatures_q30_a1000000_o.shp')  ; 
+Project.mesh.info<-ogrInfo('./SSURGOShapeFiles/MergeFeatures_q30_a1000000_o.shp')  ; 
 
 
 #### read the shape file that has been created in QGIS using the zonal statistics
 
 
-Project.GSSURGO<-readOGR('C:/Felipe/PIHM-CYCLES/PIHM/PIHM SIMULATIONS/YAHARA/Oct0920191330/DomainDecomposition/MergeFeatures_q30_a1000000_o.shp')  ;  
+Project.GSSURGO<-readOGR('./SSURGOShapeFiles/MergeFeatures_q30_a1000000_o.shp')  ;  
 
 head(Project.GSSURGO@data)
 
@@ -364,7 +364,16 @@ View(Soil.Data.Agg)
 
 dir.create('CyclesSoilsFromSSURGO', showWarnings = T) ;
 
-write.xlsx(Soil.Data.Agg, file='./CyclesSoilsFromSSURGO/agregated.data.xlsx', asTable=F, sheet.Name='agregated_data');
+# write.xlsx(x=Soil.Data.Agg, file='./CyclesSoilsFromSSURGO/agregated.data.xlsx', sheetName='agregated_data')
+
+ 
+Cycles_Soil_SSURGO<-createWorkbook() ;
+
+addWorksheet(Cycles_Soil_SSURGO, sheetName='agregated_data') ;
+
+writeData(Cycles_Soil_SSURGO, sheet='agregated_data',Soil.Data.Agg);
+
+#saveWorkbook(wb=Cycles_Soil_SSURGO, file='./CyclesSoilsFromSSURGO/agregated.data.xlsx',overwrite = T);
 
 
 
@@ -387,7 +396,7 @@ str(Mukey.Pedon.Cycles)
 depths(Mukey.Pedon.Cycles)<-mukey_ID ~ top + bottom  ;
 
 
-str(Mukey.Pedon.Cycles@horizons$) 
+str(Mukey.Pedon.Cycles@horizons) 
 
 
 plot(Mukey.Pedon, name='hzname',color='sandtotal_r')  ;
@@ -395,3 +404,65 @@ plot(Mukey.Pedon, name='hzname',color='sandtotal_r')  ;
 plot(Mukey.Pedon.Cycles,  name='hzname', color='Curve.Number') ;
 
 View(Mukey.Pedon.Cycles@horizons)
+
+
+###############################################################################################################
+#         write the parameters for each mukey into a separate file in the structure of Cycles soil input files
+#                             
+###############################################################################################################
+
+####Create a factor to separate the data in each mukey 
+
+
+Mukey.Pedon.Cycles@horizons$mukey_ID_Factor<-as.factor(as.integer(Mukey.Pedon.Cycles@horizons$mukey_ID) );
+
+str(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor)
+
+levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor) 
+
+
+### add the columns for FC, PWP NO3 and NH4
+
+Mukey.Pedon.Cycles@horizons$FC<-Mukey.Pedon.Cycles@horizons$PWP<-Mukey.Pedon.Cycles@horizons$NO3<-Mukey.Pedon.Cycles@horizons$NH4<--999 ;
+
+View(Mukey.Pedon.Cycles@horizons)
+
+### add layer thickness THICK column
+
+
+Mukey.Pedon.Cycles@horizons$THICK<-Mukey.Pedon.Cycles@horizons$bottom - Mukey.Pedon.Cycles@horizons$top  ;
+
+
+#i=levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor)[1]
+
+#for (i in levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor))
+
+for (i in levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor)) {
+  
+  CURVE_NUMBER<-unique(Mukey.Pedon.Cycles@horizons[which(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor== i), c('Curve.Number')]) ;
+  SLOPE<-0 ;
+  TOTAL_LAYERS<-dim(Mukey.Pedon.Cycles@horizons[which(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor== i),])[1];
+  
+  HEADERS<-data.frame( CURVE_NUMBER,SLOPE,TOTAL_LAYERS);
+  
+  MUKEY_i<-Mukey.Pedon.Cycles@horizons[which(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor== i),c('THICK' , 'claytotal_r' , 'sandtotal_r' , 'om_r' , 'dbthirdbar_r', 'FC' , 'PWP' , 'NO3' , 'NH4')]  ;
+  
+  names( MUKEY_i)[2:5]<-c('CLAY' , 'SAND' , 'ORGANIC' , 'BD') ;
+  
+  MUKEY_i$LAYER<-seq(1,TOTAL_LAYERS) ;
+  
+  print( MUKEY_i[,c('LAYER', 'THICK' , 'CLAY' , 'SAND' , 'ORGANIC' , 'BD',  'FC' , 'PWP' , 'NO3' , 'NH4' )])
+  
+  addWorksheet(Cycles_Soil_SSURGO, sheetName=i) ;
+  
+  writeData(Cycles_Soil_SSURGO, sheet=i,t(HEADERS),rowNames=T, colNames=F );
+
+  writeData(Cycles_Soil_SSURGO, sheet=i,  MUKEY_i, rowNames=F, colNames=T,startRow=4 )
+ 
+  saveWorkbook(wb=Cycles_Soil_SSURGO, file='./CyclesSoilsFromSSURGO/agregated.data.xlsx', overwrite = T);
+
+}
+
+
+
+
