@@ -457,7 +457,7 @@ for (i in levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor)) {
   
   writeData(Cycles_Soil_SSURGO, sheet=i,t(HEADERS),rowNames=T, colNames=F );
 
-  writeData(Cycles_Soil_SSURGO, sheet=i,  MUKEY_i, rowNames=F, colNames=T,startRow=4 )
+  writeData(Cycles_Soil_SSURGO, sheet=i,  MUKEY_i[,c('LAYER', 'THICK' , 'CLAY' , 'SAND' , 'ORGANIC' , 'BD',  'FC' , 'PWP' , 'NO3' , 'NH4' )], rowNames=F, colNames=T,startRow=4 )
  
   saveWorkbook(wb=Cycles_Soil_SSURGO, file='./CyclesSoilsFromSSURGO/agregated.data.xlsx', overwrite = T);
 
