@@ -296,39 +296,6 @@ str(Mukey.Pedon)
 
 
 
-
-
-
-###############################################################################################################
-#                           Use the slab funtion on the AQP package to obtain the parameters at the layers
-#                             needed for Cycles
-###############################################################################################################
-
-
-Mukey.Pedon.Cycles.Slabs<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
-
-Mukey.Pedon.Cycles.1<-dcast(Mukey.Pedon.Cycles.Slabs, mukey_ID + top + bottom ~ variable) ;
-
-str(Mukey.Pedon.Cycles.1)
-
-Mukey.Pedon.Cycles<-merge(Mukey.Pedon.Cycles.1, Mukey.Pedon@horizons[, c('mukey_ID','musym', 'Cover.type' ,'Treatment', 'Hydrologic.condition' , 'hydgrpdcd' , 'Curve.Number','taxorder', 'taxsuborder' , 'taxgrtgroup' , 'taxsubgrp')], by=c('mukey_ID')) ;
-
-str(Mukey.Pedon.Cycles)
-
-depths(Mukey.Pedon.Cycles)<-mukey_ID ~ top + bottom  ;
-
-
-str(Mukey.Pedon.Cycles@horizons$) 
-
-
-plot(Mukey.Pedon, name='hzname',color='sandtotal_r')  ;
-
-plot(Mukey.Pedon.Cycles,  name='hzname', color='Curve.Number') ;
-
-View(Mukey.Pedon.Cycles@horizons)
-
-
-
 ###############################################################################################################
 #                           Use the slab funtion on the AQP package to obtain the average parameters for the 
 #                             0 to 20 cm aggregation
@@ -340,7 +307,7 @@ Mukey.Pedon.Slabs_Cycles_0_20<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sand
 
 Mukey.Pedon.Cycles_0_20.1<-dcast(Mukey.Pedon.Slabs_Cycles_0_20, mukey_ID + top + bottom ~ variable)  ;
 
-Mukey.Pedon.Cycles_0_20<-merge(Mukey.Pedon.Cycles_0_20.1, Mukey.Pedon@horizons[, c('mukey_ID','musym', 'Cover.type' ,'Treatment', 'Hydrologic.condition' , 'hydgrpdcd' , 'Curve.Number','taxorder', 'taxsuborder' , 'taxgrtgroup' , 'taxsubgrp')], by=c('mukey_ID')) ;
+Mukey.Pedon.Cycles_0_20<-merge(Mukey.Pedon.Cycles_0_20.1, unique(Mukey.Pedon@horizons[, c('mukey_ID','musym','compname', 'Cover.type' ,'Treatment', 'Hydrologic.condition' , 'hydgrpdcd' , 'drclassdcd', 'Curve.Number','taxorder', 'taxsuborder' , 'taxgrtgroup' , 'taxsubgrp')]), by=c('mukey_ID'), all.x=T) ;
 
 str(Mukey.Pedon.Cycles_0_20)
 
@@ -363,7 +330,7 @@ Mukey.Pedon.Slabs_Cycles_0_100<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + san
 
 Mukey.Pedon.Cycles_0_100.1<-dcast(Mukey.Pedon.Slabs_Cycles_0_100, mukey_ID + top + bottom ~ variable)  ;
 
-Mukey.Pedon.Cycles_0_100<-merge(Mukey.Pedon.Cycles_0_100.1, Mukey.Pedon@horizons[, c('mukey_ID','musym', 'Cover.type' ,'Treatment', 'Hydrologic.condition' , 'hydgrpdcd' , 'Curve.Number','taxorder', 'taxsuborder' , 'taxgrtgroup' , 'taxsubgrp')], by=c('mukey_ID')) ;
+Mukey.Pedon.Cycles_0_100<-merge(Mukey.Pedon.Cycles_0_100.1, unique(Mukey.Pedon@horizons[, c('mukey_ID','musym','compname', 'Cover.type' ,'Treatment', 'Hydrologic.condition' , 'hydgrpdcd' , 'drclassdcd', 'Curve.Number','taxorder', 'taxsuborder' , 'taxgrtgroup' , 'taxsubgrp')]), by=c('mukey_ID')) ;
 
 str(Mukey.Pedon.Cycles_0_100)
 
@@ -374,3 +341,57 @@ str(Mukey.Pedon.Cycles_0_100@horizons)
 plot(Mukey.Pedon.Cycles_0_100,  name='hzname', color='sandtotal_r') ;
 
 plot(Mukey.Pedon.Cycles_0_100,  name='hzname', color='Curve.Number') ;
+
+
+###############################################################################################################
+#                          Get all the data together into a table for RF analysis
+#                            
+###############################################################################################################
+
+str(Mukey.Pedon.Cycles_0_20@horizons) 
+
+names(Mukey.Pedon.Cycles_0_20@horizons)[c(4:8)]<-c("claytotal_r_0-20" , "sandtotal_r_0-20" , "silttotal_r_0-20" , "om_r_0-20" , "dbthirdbar_r_0-20") ;
+
+str(Mukey.Pedon.Cycles_0_100@horizons) 
+
+names(Mukey.Pedon.Cycles_0_100@horizons)[c(4:8)]<-c("claytotal_r_0-100" , "sandtotal_r_0-100" , "silttotal_r_0-100" , "om_r_0-100" , "dbthirdbar_r_0-100") ; 
+
+Soil.Data.Agg<-merge(Mukey.Pedon.Cycles_0_20@horizons[],Mukey.Pedon.Cycles_0_100@horizons,by=c('mukey_ID', 'musym', 'Cover.type', 'Treatment','Hydrologic.condition', 'hydgrpdcd' , 'Curve.Number', 'taxorder' ,'taxsuborder' , 'taxgrtgroup','taxsubgrp', 'compname' , 'drclassdcd')) ;
+  
+View(Soil.Data.Agg)
+
+#### create a directory to put the aggregated data together
+
+dir.create('CyclesSoilsFromSSURGO', showWarnings = T) ;
+
+write.xlsx(Soil.Data.Agg, file='./CyclesSoilsFromSSURGO/agregated.data.xlsx', asTable=F, sheet.Name='agregated_data');
+
+
+
+###############################################################################################################
+#                           Use the slab funtion on the AQP package to obtain the parameters at the layers
+#                             needed for Cycles
+###############################################################################################################
+
+
+Mukey.Pedon.Cycles.Slabs<-slab(Mukey.Pedon,fm=mukey_ID ~ claytotal_r + sandtotal_r + silttotal_r + om_r + dbthirdbar_r , slab.structure = c(0,5,10,20,40,60,80,100) , slab.fun=mean,na.rm=T ) ;
+
+Mukey.Pedon.Cycles.1<-dcast(Mukey.Pedon.Cycles.Slabs, mukey_ID + top + bottom ~ variable) ;
+
+str(Mukey.Pedon.Cycles.1)
+
+Mukey.Pedon.Cycles<-merge(Mukey.Pedon.Cycles.1, unique(Mukey.Pedon@horizons[, c('mukey_ID','musym', 'compname' ,'Cover.type' ,'Treatment', 'Hydrologic.condition' , 'hydgrpdcd' , 'drclassdcd' , 'Curve.Number','taxorder', 'taxsuborder' , 'taxgrtgroup' , 'taxsubgrp')]), by=c('mukey_ID')) ;
+
+str(Mukey.Pedon.Cycles)
+
+depths(Mukey.Pedon.Cycles)<-mukey_ID ~ top + bottom  ;
+
+
+str(Mukey.Pedon.Cycles@horizons$) 
+
+
+plot(Mukey.Pedon, name='hzname',color='sandtotal_r')  ;
+
+plot(Mukey.Pedon.Cycles,  name='hzname', color='Curve.Number') ;
+
+View(Mukey.Pedon.Cycles@horizons)
