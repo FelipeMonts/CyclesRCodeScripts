@@ -360,6 +360,21 @@ Soil.Data.Agg<-merge(Mukey.Pedon.Cycles_0_20@horizons[],Mukey.Pedon.Cycles_0_100
   
 View(Soil.Data.Agg)
 
+
+
+#####      Add the carbon saturation procedure according to the paper by Virgina Pravia
+#  Pravia, M. Virginia, Armen R. Kemanian, José A. Terra, Yuning Shi, Ignacio Macedo, and Sarah Goslee. 2019. "Soil Carbon Saturation, Productivity, and Carbon #   and Nitrogen Cycling in Crop-Pasture Rotations." Agricultural Systems 171 (May): 13-22. https://doi.org/10.1016/j.agsy.2018.11.001.
+#
+# Soil Carbon Saturation Eq 1  Cx= 0.021 + 0.038 fc   ; Cx = Carbon Saturation kg C kg soil-1 , fc clay fraction
+#Conversion from Organic carboin to Organic Mater    OM = 1.72 x Cx  ; OM organic mater fraction  kg OM kg soil-1 
+#
+######
+
+
+
+
+
+
 #### create a directory to put the aggregated data together
 
 dir.create('CyclesSoilsFromSSURGO', showWarnings = T) ;
@@ -453,13 +468,23 @@ for (i in levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor)) {
   
   print( MUKEY_i[,c('LAYER', 'THICK' , 'CLAY' , 'SAND' , 'ORGANIC' , 'BD',  'FC' , 'PWP' , 'NO3' , 'NH4' )])
   
-  addWorksheet(Cycles_Soil_SSURGO, sheetName=i) ;
   
-  writeData(Cycles_Soil_SSURGO, sheet=i,t(HEADERS),rowNames=T, colNames=F );
-
-  writeData(Cycles_Soil_SSURGO, sheet=i,  MUKEY_i[,c('LAYER', 'THICK' , 'CLAY' , 'SAND' , 'ORGANIC' , 'BD',  'FC' , 'PWP' , 'NO3' , 'NH4' )], rowNames=F, colNames=T,startRow=4 )
- 
-  saveWorkbook(wb=Cycles_Soil_SSURGO, file='./CyclesSoilsFromSSURGO/agregated.data.xlsx', overwrite = T);
+  write.table(t(HEADERS),file=paste0('./CyclesSoilsFromSSURGO/',i,".txt"), row.names=T, col.names=F, quote=F );
+  
+  write.table( MUKEY_i[,c('LAYER', 'THICK' , 'CLAY' , 'SAND' , 'ORGANIC' , 'BD',  'FC' , 'PWP' , 'NO3' , 'NH4' )],file=paste0('./CyclesSoilsFromSSURGO/',i,".txt"), row.names=F, col.names=T, quote=F,  append =T );
+  
+  
+  
+  
+  
+  
+  # addWorksheet(Cycles_Soil_SSURGO, sheetName=i) ;
+  # 
+  # writeData(Cycles_Soil_SSURGO, sheet=i,t(HEADERS),rowNames=T, colNames=F );
+  # 
+  # writeData(Cycles_Soil_SSURGO, sheet=i,  MUKEY_i[,c('LAYER', 'THICK' , 'CLAY' , 'SAND' , 'ORGANIC' , 'BD',  'FC' , 'PWP' , 'NO3' , 'NH4' )], rowNames=F, colNames=T,startRow=4 )
+  # 
+  # saveWorkbook(wb=Cycles_Soil_SSURGO, file='./CyclesSoilsFromSSURGO/agregated.data.xlsx', overwrite = T);
 
 }
 
