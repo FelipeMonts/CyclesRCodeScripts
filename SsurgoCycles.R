@@ -360,18 +360,7 @@ Soil.Data.Agg<-merge(Mukey.Pedon.Cycles_0_20@horizons[],Mukey.Pedon.Cycles_0_100
   
 View(Soil.Data.Agg)
 
-
-
-#####      Add the carbon saturation procedure according to the paper by Virgina Pravia
-#  Pravia, M. Virginia, Armen R. Kemanian, José A. Terra, Yuning Shi, Ignacio Macedo, and Sarah Goslee. 2019. "Soil Carbon Saturation, Productivity, and Carbon #   and Nitrogen Cycling in Crop-Pasture Rotations." Agricultural Systems 171 (May): 13-22. https://doi.org/10.1016/j.agsy.2018.11.001.
-#
-# Soil Carbon Saturation Eq 1  Cx= 0.021 + 0.038 fc   ; Cx = Carbon Saturation kg C kg soil-1 , fc clay fraction
-#Conversion from Organic carboin to Organic Mater    OM = 1.72 x Cx  ; OM organic mater fraction  kg OM kg soil-1 
-#
-######
-
-
-
+str(Soil.Data.Agg)
 
 
 
@@ -420,6 +409,48 @@ plot(Mukey.Pedon.Cycles,  name='hzname', color='Curve.Number') ;
 
 View(Mukey.Pedon.Cycles@horizons)
 
+str(Mukey.Pedon.Cycles@horizons)
+
+
+
+###############################################################################################################
+#
+#                       Add the carbon saturation procedure according to the paper by Virgina Pravia
+#
+###############################################################################################################
+
+
+
+#####     
+#  Pravia, M. Virginia, Armen R. Kemanian, José A. Terra, Yuning Shi, Ignacio Macedo, and Sarah Goslee. 2019. "Soil Carbon Saturation, Productivity, and Carbon #   and Nitrogen Cycling in Crop-Pasture Rotations." Agricultural Systems 171 (May): 13-22. https://doi.org/10.1016/j.agsy.2018.11.001.
+#
+# Soil Carbon Saturation Eq 1  Cx= 0.021 + 0.038 fc   ; Cx = Carbon Saturation kg C kg soil-1 , fc clay fraction
+#Conversion from Organic carboin to Organic Mater    OM = 1.72 x Cx  ; OM organic mater fraction  kg OM kg soil-1 
+#
+######
+
+### Add a column to determine if the layer is carbon saturated
+
+Mukey.Pedon.Cycles@horizons$Cx_as_OM<-((Mukey.Pedon.Cycles@horizons$claytotal_r*0.038)+0.021)*1.72 ;
+
+##### Select the Horizons that are Carbon saturated and add the column CSaturated and mark them with "TRUE" or "FALSE"
+
+Mukey.Pedon.Cycles@horizons$CSaturated<-Mukey.Pedon.Cycles@horizons$om_r > Mukey.Pedon.Cycles@horizons$Cx_as_OM;
+
+#### Ad the column NonSatOM  to the database and correct the saturated values of OM with the Cx_as_OM 
+
+Mukey.Pedon.Cycles@horizons$NonSatOM<-ifelse(Mukey.Pedon.Cycles@horizons$CSaturated=="TRUE", Mukey.Pedon.Cycles@horizons$Cx_as_OM, Mukey.Pedon.Cycles@horizons$om_r ) ;
+
+
+View(Mukey.Pedon.Cycles@horizons[,c('mukey_ID', 'om_r','claytotal_r', 'Cx_as_OM', 'CSaturated' , 'NonSatOM')])
+
+
+names(Mukey.Pedon.Cycles@horizons)
+
+
+
+
+
 
 ###############################################################################################################
 #         write the parameters for each mukey into a separate file in the structure of Cycles soil input files
@@ -448,7 +479,7 @@ View(Mukey.Pedon.Cycles@horizons)
 Mukey.Pedon.Cycles@horizons$THICK<-Mukey.Pedon.Cycles@horizons$bottom - Mukey.Pedon.Cycles@horizons$top  ;
 
 
-#i=levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor)[1]
+i=levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor)[1]
 
 #for (i in levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor))
 
@@ -460,7 +491,7 @@ for (i in levels(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor)) {
   
   HEADERS<-data.frame( CURVE_NUMBER,SLOPE,TOTAL_LAYERS);
   
-  MUKEY_i<-Mukey.Pedon.Cycles@horizons[which(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor== i),c('THICK' , 'claytotal_r' , 'sandtotal_r' , 'om_r' , 'dbthirdbar_r', 'FC' , 'PWP' , 'NO3' , 'NH4')]  ;
+  MUKEY_i<-Mukey.Pedon.Cycles@horizons[which(Mukey.Pedon.Cycles@horizons$mukey_ID_Factor== i),c('THICK' , 'claytotal_r' , 'sandtotal_r' , 'NonSatOM' , 'dbthirdbar_r', 'FC' , 'PWP' , 'NO3' , 'NH4')]  ;
   
   names( MUKEY_i)[2:5]<-c('CLAY' , 'SAND' , 'ORGANIC' , 'BD') ;
   
